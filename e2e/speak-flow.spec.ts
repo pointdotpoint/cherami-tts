@@ -14,8 +14,10 @@ test.describe('Speak flow', () => {
     const shadow = getPopupShadow(page);
     await shadow.locator('button[title="Speak selected text"]').click();
 
-    await expect(shadow.locator('.loading-spinner')).toBeVisible({ timeout: 10_000 });
+    // Wait for speaking state (stop button) — loading spinner may be too brief to catch
     await expect(shadow.locator('button.speaking')).toBeVisible({ timeout: 30_000 });
+
+    // Should auto-hide after speech finishes (IDLE → 300ms → hide)
     await expect(shadow).toBeHidden({ timeout: 30_000 });
 
     await page.close();

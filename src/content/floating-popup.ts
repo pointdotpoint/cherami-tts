@@ -14,7 +14,7 @@ export class FloatingPopup {
 
   constructor() {
     this.host = document.createElement('cherami-tts-popup');
-    this.shadow = this.host.attachShadow({ mode: 'closed' });
+    this.shadow = this.host.attachShadow({ mode: 'open' });
 
     const style = document.createElement('style');
     style.textContent = popupStyles;

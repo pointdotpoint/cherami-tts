@@ -9,13 +9,6 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.resolve(__dirname, '..');
 const DIST = path.join(ROOT, 'dist');
 
-const SHADOW_DOM_PATCH = `
-  const _origAttachShadow = Element.prototype.attachShadow;
-  Element.prototype.attachShadow = function(init) {
-    return _origAttachShadow.call(this, { ...init, mode: 'open' });
-  };
-`;
-
 export const test = base.extend<{
   context: BrowserContext;
   extensionId: string;
@@ -24,7 +17,6 @@ export const test = base.extend<{
     const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'cherami-e2e-'));
     const context = await chromium.launchPersistentContext(tmpDir, {
       headless: false,
-      channel: 'chrome',
       args: [
         `--disable-extensions-except=${DIST}`,
         `--load-extension=${DIST}`,
@@ -56,9 +48,10 @@ export async function createTestPage(
   url: string = 'https://example.com'
 ): Promise<Page> {
   const page = await context.newPage();
-  await page.addInitScript(SHADOW_DOM_PATCH);
   await page.goto(url);
   await page.waitForLoadState('domcontentloaded');
+  // Wait for content script to inject
+  await page.waitForTimeout(1000);
   return page;
 }
 
@@ -85,7 +78,14 @@ export async function selectTextAndWaitForPopup(
   }, selector);
 
   await page.dispatchEvent(selector, 'mouseup');
-  await page.waitForSelector('cherami-tts-popup', { state: 'attached', timeout: 5000 });
+
+  // Wait for popup (200ms debounce + rendering)
+  await page.waitForFunction(() => {
+    const host = document.querySelector('cherami-tts-popup');
+    if (!host) return false;
+    const container = host.shadowRoot?.querySelector('.popup') as HTMLElement;
+    return container?.style.display !== 'none';
+  }, {}, { timeout: 5000 });
 }
 
 export function getPopupShadow(page: Page) {

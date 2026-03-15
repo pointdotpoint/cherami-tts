@@ -7,14 +7,7 @@ export default defineConfig({
   workers: 1,
   globalSetup: './global-setup.ts',
   use: {
+    // Chrome extensions require headed mode
     headless: false,
   },
-  projects: [
-    {
-      name: 'chrome',
-      use: {
-        channel: 'chrome',
-      },
-    },
-  ],
 });
