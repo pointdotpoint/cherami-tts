@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>cherami-tts Settings</title>
+  <link rel="stylesheet" href="options.css">
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>cherami-tts</h1>
+      <p class="subtitle">Local, privacy-respecting text-to-speech</p>
+    </header>
+
+    <section class="card">
+      <h2>Voice</h2>
+      <div class="field">
+        <label for="voice-select">Active voice</label>
+        <select id="voice-select"></select>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>Speed</h2>
+      <div class="field">
+        <label for="speed-slider">Playback speed: <span id="speed-value">1.0x</span></label>
+        <input type="range" id="speed-slider" min="0.5" max="2.0" step="0.1" value="1.0">
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>Voice Library</h2>
+      <p class="hint">Download voices to use them offline. Models are cached locally in your browser.</p>
+      <div id="voice-list"></div>
+    </section>
+
+    <footer>
+      <p>All speech synthesis happens entirely in your browser. No data leaves your machine.</p>
+    </footer>
+  </div>
+
+  <script type="module" src="options.js"></script>
+</body>
+</html>

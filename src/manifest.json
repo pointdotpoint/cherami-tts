@@ -1,0 +1,32 @@
+{
+  "manifest_version": 3,
+  "name": "cherami-tts",
+  "version": "1.0.0",
+  "description": "Local, privacy-respecting text-to-speech. Select text and hear it spoken — all processing happens in your browser.",
+  "permissions": ["contextMenus", "offscreen", "storage", "unlimitedStorage", "activeTab"],
+  "content_security_policy": {
+    "extension_pages": "script-src 'self' 'wasm-unsafe-eval'; object-src 'self';"
+  },
+  "background": {
+    "service_worker": "background/service-worker.js",
+    "type": "module"
+  },
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["content/content-script.js"]
+    }
+  ],
+  "options_page": "options/options.html",
+  "web_accessible_resources": [
+    {
+      "resources": ["onnx/*", "piper/*", "worker/*"],
+      "matches": ["<all_urls>"]
+    }
+  ],
+  "icons": {
+    "16": "icons/icon-16.png",
+    "48": "icons/icon-48.png",
+    "128": "icons/icon-128.png"
+  }
+}

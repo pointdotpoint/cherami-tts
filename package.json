@@ -1,0 +1,19 @@
+{
+  "name": "cherami-tts",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite build --watch",
+    "build": "vite build && vite build --config vite.config.content.ts"
+  },
+  "dependencies": {
+    "piper-tts-web": "^1.1.2"
+  },
+  "devDependencies": {
+    "@types/chrome": "^0.1.36",
+    "typescript": "^5.9.3",
+    "vite": "^7.3.1",
+    "vite-plugin-static-copy": "^3.2.0"
+  }
+}
