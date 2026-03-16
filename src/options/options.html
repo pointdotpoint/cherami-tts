@@ -7,6 +7,7 @@
 </head>
 <body>
   <div class="container">
+    <div id="alert-container"></div>
     <header>
       <h1>cherami-tts</h1>
       <p class="subtitle">Local, privacy-respecting text-to-speech</p>
@@ -17,6 +18,11 @@
       <div class="field">
         <label for="voice-select">Active voice</label>
         <select id="voice-select"></select>
+      </div>
+      <div class="field test-voice-field">
+        <label for="test-text">Test text</label>
+        <textarea id="test-text" rows="3" placeholder="Type something to hear how the selected voice sounds..."></textarea>
+        <button class="btn btn-primary" id="test-voice-btn">Test voice</button>
       </div>
     </section>
 
@@ -29,9 +35,47 @@
     </section>
 
     <section class="card">
+      <h2 class="advanced-toggle" id="advanced-toggle">
+        Advanced
+        <span class="toggle-arrow" id="toggle-arrow">&#9654;</span>
+      </h2>
+      <div class="advanced-content" id="advanced-content" hidden>
+        <div class="field prosody-field" id="noise-scale-field">
+          <label>Expressiveness: <span id="noise-scale-value">Voice default</span></label>
+          <div class="prosody-control">
+            <input type="range" id="noise-scale-slider" min="0" max="1.0" step="0.05" value="0.5" disabled>
+            <button class="btn-link" id="noise-scale-toggle">Customize</button>
+          </div>
+        </div>
+        <div class="field prosody-field" id="noise-w-field">
+          <label>Rhythm variation: <span id="noise-w-value">Voice default</span></label>
+          <div class="prosody-control">
+            <input type="range" id="noise-w-slider" min="0" max="1.0" step="0.05" value="0.5" disabled>
+            <button class="btn-link" id="noise-w-toggle">Customize</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="card">
       <h2>Voice Library</h2>
       <p class="hint">Download voices to use them offline. Models are cached locally in your browser.</p>
       <div id="voice-list"></div>
+
+      <div class="custom-voices-section">
+        <h3>Custom Voices</h3>
+        <p class="hint">Upload your own Piper ONNX voice. You need both the <code>.onnx</code> model and its <code>.onnx.json</code> config.</p>
+        <div id="custom-voice-list"></div>
+        <div class="upload-form" id="upload-form">
+          <label for="upload-name">Voice name</label>
+          <input type="text" id="upload-name" placeholder="My Custom Voice">
+          <label for="upload-onnx">ONNX model file (.onnx)</label>
+          <input type="file" id="upload-onnx" accept=".onnx">
+          <label for="upload-config">Config file (.onnx.json)</label>
+          <input type="file" id="upload-config" accept=".json,.onnx.json">
+          <button class="btn btn-primary" id="upload-btn">Upload</button>
+        </div>
+      </div>
     </section>
 
     <footer>
