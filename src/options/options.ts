@@ -276,6 +276,13 @@ function createVoiceProsodyControls(voiceId: string, container: HTMLElement) {
   resetAll.addEventListener('click', () => {
     delete voiceProsodyOverrides[voiceId];
     chrome.storage.sync.set({ [STORAGE_KEYS.VOICE_PROSODY]: voiceProsodyOverrides });
+    // Reset slider UI to default state
+    nsSlider.disabled = true;
+    nsLabel.textContent = 'Expressiveness: Global';
+    nsToggle.textContent = 'Customize';
+    nwSlider.disabled = true;
+    nwLabel.textContent = 'Rhythm variation: Global';
+    nwToggle.textContent = 'Customize';
     prosodyPanel.hidden = true;
     expandedProsodyPanels.delete(voiceId);
     customizeLink.textContent = 'Customize prosody';

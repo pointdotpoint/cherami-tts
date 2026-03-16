@@ -58,7 +58,7 @@ chrome.contextMenus.onClicked.addListener(async (info, tab) => {
 
   await ensureOffscreenDocument();
 
-  const prosody = await resolveProsody(settings.selectedVoice);
+  const prosody = await resolveProsody(settings.selectedVoice, settings);
   chrome.runtime.sendMessage({
     type: MessageType.SPEAK,
     text: info.selectionText,
@@ -76,12 +76,15 @@ chrome.contextMenus.onClicked.addListener(async (info, tab) => {
   }
 });
 
-async function resolveProsody(voiceId: string): Promise<{ noiseScale?: number; noiseW?: number }> {
-  const settings = await getSettings();
-  const perVoice = settings.voiceProsody[voiceId];
+async function resolveProsody(
+  voiceId: string,
+  settings?: Awaited<ReturnType<typeof getSettings>>
+): Promise<{ noiseScale?: number; noiseW?: number }> {
+  const s = settings ?? await getSettings();
+  const perVoice = s.voiceProsody[voiceId];
   return {
-    noiseScale: perVoice?.noiseScale ?? settings.noiseScale ?? undefined,
-    noiseW: perVoice?.noiseW ?? settings.noiseW ?? undefined,
+    noiseScale: perVoice?.noiseScale ?? s.noiseScale ?? undefined,
+    noiseW: perVoice?.noiseW ?? s.noiseW ?? undefined,
   };
 }
 
