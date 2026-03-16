@@ -13,6 +13,9 @@ export enum MessageType {
   LIST_CACHED_VOICES = 'LIST_CACHED_VOICES',
   LIST_CACHED_VOICES_RESULT = 'LIST_CACHED_VOICES_RESULT',
 
+  // Content script → Service worker
+  OPEN_OPTIONS = 'OPEN_OPTIONS',
+
   // Service worker → Offscreen (lifecycle)
   INIT_ENGINE = 'INIT_ENGINE',
   ENGINE_READY = 'ENGINE_READY',
@@ -31,6 +34,8 @@ export interface SpeakMessage {
   text: string;
   voiceId: string;
   speed: number;
+  noiseScale?: number;
+  noiseW?: number;
 }
 
 export interface StopMessage {
@@ -70,6 +75,10 @@ export interface ListCachedVoicesResultMessage {
   voices: string[];
 }
 
+export interface OpenOptionsMessage {
+  type: MessageType.OPEN_OPTIONS;
+}
+
 export interface InitEngineMessage {
   type: MessageType.INIT_ENGINE;
 }
@@ -87,5 +96,6 @@ export type ExtensionMessage =
   | RemoveVoiceMessage
   | ListCachedVoicesMessage
   | ListCachedVoicesResultMessage
+  | OpenOptionsMessage
   | InitEngineMessage
   | EngineReadyMessage;
