@@ -5,12 +5,24 @@ export const SPEED_MAX = 2.0;
 export const SPEED_STEP = 0.1;
 export const SPEED_DEFAULT = 1.0;
 
+export const NOISE_SCALE_MIN = 0;
+export const NOISE_SCALE_MAX = 1.0;
+export const NOISE_SCALE_STEP = 0.05;
+export const NOISE_SCALE_DEFAULT = 0.5;
+
+export const NOISE_W_MIN = 0;
+export const NOISE_W_MAX = 1.0;
+export const NOISE_W_STEP = 0.05;
+export const NOISE_W_DEFAULT = 0.5;
+
 export const MIN_SELECTION_LENGTH = 3;
 
 export const HUGGINGFACE_BASE_URL =
   'https://huggingface.co/rhasspy/piper-voices/resolve/main/';
 
 export const CONTEXT_MENU_ID = 'cherami-tts-speak';
+
+export const BUNDLED_VOICES = new Set<string>();
 
 // Curated list of recommended English voices
 export interface VoiceInfo {
