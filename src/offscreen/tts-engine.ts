@@ -62,23 +62,36 @@ export async function initEngine(): Promise<void> {
 export async function synthesize(
   text: string,
   voiceId: string,
-  speed: number
+  speed: number,
+  noiseScale?: number,
+  noiseW?: number
 ): Promise<Blob> {
   if (!engine) {
     await initEngine();
   }
 
-  // Pre-load voice data to modify length_scale for speed
+  // Pre-load voice data to modify inference params
   const voiceData = await voiceProvider!.fetch(voiceId);
-  const originalLengthScale = voiceData[0].inference.length_scale;
-  voiceData[0].inference.length_scale = originalLengthScale / speed;
+  const inference = voiceData[0].inference;
+  const originalLengthScale = inference.length_scale;
+  const originalNoiseScale = inference.noise_scale;
+  const originalNoiseW = inference.noise_w;
+
+  inference.length_scale = originalLengthScale / speed;
+  if (noiseScale !== undefined) {
+    inference.noise_scale = noiseScale;
+  }
+  if (noiseW !== undefined) {
+    inference.noise_w = noiseW;
+  }
 
   try {
     const response = await engine.generate(text, voiceId, 0);
     return response.file as Blob;
   } finally {
-    // Restore original length_scale
-    voiceData[0].inference.length_scale = originalLengthScale;
+    inference.length_scale = originalLengthScale;
+    inference.noise_scale = originalNoiseScale;
+    inference.noise_w = originalNoiseW;
   }
 }
 
