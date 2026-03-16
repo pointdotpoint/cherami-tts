@@ -12,6 +12,7 @@ import {
   listCached,
   removeVoice,
 } from './voice-manager.js';
+import { splitIntoChunks, normalizeText } from './text-utils.js';
 
 function sendState(state: TtsState, error?: string) {
   chrome.runtime.sendMessage({
@@ -21,53 +22,62 @@ function sendState(state: TtsState, error?: string) {
   });
 }
 
-// Split text into sentences for sequential synthesis
-function splitIntoChunks(text: string): string[] {
-  // Split on sentence-ending punctuation followed by whitespace
-  const chunks = text.match(/[^.!?]+[.!?]*\s*/g) || [text];
-  // Filter empty/whitespace-only chunks and trim
-  return chunks.map(c => c.trim()).filter(c => c.length > 0);
+let speakAborted = false;
+let processing = false;
+const speakQueue: SpeakMessage[] = [];
+
+function handleSpeak(msg: SpeakMessage) {
+  speakQueue.push(msg);
+  if (processing) return;
+  processQueue();
 }
 
-let speakAborted = false;
+async function processQueue() {
+  processing = true;
 
-async function handleSpeak(msg: SpeakMessage) {
-  speakAborted = false;
-  sendState(TtsState.LOADING);
+  while (speakQueue.length > 0) {
+    speakAborted = false;
+    const msg = speakQueue.shift()!;
 
-  try {
-    await initEngine();
+    try {
+      sendState(TtsState.LOADING);
+      await initEngine();
 
-    const chunks = splitIntoChunks(msg.text);
+      const normalized = normalizeText(msg.text);
+      const chunks = splitIntoChunks(normalized);
 
-    for (let i = 0; i < chunks.length; i++) {
-      if (speakAborted) {
-        sendState(TtsState.STOPPED);
-        return;
+      for (let i = 0; i < chunks.length; i++) {
+        if (speakAborted) {
+          sendState(TtsState.STOPPED);
+          break;
+        }
+
+        const wavBlob = await synthesize(chunks[i], msg.voiceId, msg.speed, msg.noiseScale, msg.noiseW);
+
+        if (speakAborted) {
+          sendState(TtsState.STOPPED);
+          break;
+        }
+
+        sendState(TtsState.SPEAKING);
+
+        await new Promise<void>((resolve) => {
+          playAudio(wavBlob, resolve);
+        });
       }
 
-      const wavBlob = await synthesize(chunks[i], msg.voiceId, msg.speed);
-
-      if (speakAborted) {
-        sendState(TtsState.STOPPED);
-        return;
+      // Only send IDLE if no more items queued
+      if (speakQueue.length === 0) {
+        sendState(TtsState.IDLE);
       }
-
-      sendState(TtsState.SPEAKING);
-
-      // Play and wait for it to finish
-      await new Promise<void>((resolve) => {
-        playAudio(wavBlob, resolve);
-      });
+    } catch (err: any) {
+      console.error('TTS error:', err);
+      sendState(TtsState.ERROR, err.message || 'Unknown TTS error');
+      continue;
     }
-
-    if (!speakAborted) {
-      sendState(TtsState.IDLE);
-    }
-  } catch (err: any) {
-    console.error('TTS error:', err);
-    sendState(TtsState.ERROR, err.message || 'Unknown TTS error');
   }
+
+  processing = false;
 }
 
 async function handleDownloadVoice(msg: DownloadVoiceMessage) {
@@ -92,7 +102,7 @@ async function handleDownloadVoice(msg: DownloadVoiceMessage) {
 }
 
 chrome.runtime.onMessage.addListener(
-  (message: ExtensionMessage, _sender, sendResponse) => {
+  (message: ExtensionMessage, sender, sendResponse) => {
     switch (message.type) {
       case MessageType.INIT_ENGINE:
         initEngine()
@@ -105,10 +115,13 @@ chrome.runtime.onMessage.addListener(
         return false;
 
       case MessageType.SPEAK:
+        if (sender.tab) return false;
         handleSpeak(message);
         return false;
 
       case MessageType.STOP:
+        if (sender.tab) return false;
+        speakQueue.length = 0;
         speakAborted = true;
         stopAudio();
         sendState(TtsState.STOPPED);
