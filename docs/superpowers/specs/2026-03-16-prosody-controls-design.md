@@ -16,7 +16,7 @@ Currently, the only speech tuning available is the speed slider (`length_scale`)
 | `noiseW` | `number \| null` | `null` | Global rhythm variation. `null` = use voice model default. |
 | `voiceProsody` | `Record<string, { noiseScale?: number; noiseW?: number }>` | `{}` | Per-voice overrides keyed by voiceId. |
 
-Added to `STORAGE_KEYS` and `STORAGE_DEFAULTS` in `src/shared/storage-keys.ts`. `getSettings()` returns the new fields.
+Added to `STORAGE_KEYS` and `STORAGE_DEFAULTS` in `src/shared/storage-keys.ts`. `getSettings()` returns the new fields including `noiseScale`, `noiseW`, and `voiceProsody`. No migration is needed — `chrome.storage.sync.get(STORAGE_DEFAULTS)` returns defaults for missing keys automatically.
 
 ### Parameter ranges
 
@@ -43,7 +43,11 @@ to:
 synthesize(text: string, voiceId: string, speed: number, noiseScale?: number, noiseW?: number): Promise<Blob>
 ```
 
-When `noiseScale` or `noiseW` are provided (not `undefined`), temporarily mutate the corresponding field on `voiceData[0].inference` before calling `engine.generate()`, then restore in the `finally` block — same pattern as the existing `length_scale` speed mutation.
+When `noiseScale` or `noiseW` are provided (not `undefined`), temporarily mutate the corresponding fields on `voiceData[0].inference` before calling `engine.generate()`, then restore in the `finally` block — same pattern as the existing `length_scale` speed mutation.
+
+The exact piper config property names are `noise_scale` and `noise_w` (snake_case), matching the existing `length_scale` convention on `voiceData[0].inference`.
+
+**Concurrency assumption:** This mutation pattern requires serial synthesis, which is guaranteed by `processQueue()` processing chunks sequentially with `await`. No concurrent `synthesize()` calls occur for the same voice.
 
 ### Caller resolution in `src/offscreen/offscreen.ts`
 
@@ -57,7 +61,7 @@ noiseScale?: number;
 noiseW?: number;
 ```
 
-The service worker reads the resolved prosody values from storage and includes them when forwarding SPEAK to the offscreen document. The content script does not need to know about prosody — the service worker handles resolution.
+The service worker **intercepts** all SPEAK messages (from both content scripts and the options page), reads prosody settings from `chrome.storage.sync`, resolves the override chain for the target voiceId, and constructs a new message with `noiseScale`/`noiseW` fields added before forwarding to the offscreen document. This replaces the current pass-through pattern (`chrome.runtime.sendMessage(message)`) with `chrome.runtime.sendMessage({ ...message, noiseScale, noiseW })`. The content script does not need to know about prosody — the service worker handles resolution for all SPEAK origins.
 
 ## Options Page UI
 
@@ -65,9 +69,11 @@ The service worker reads the resolved prosody values from storage and includes t
 
 A collapsible **"Advanced"** section below the speed slider, **collapsed by default**. Contains:
 
-- **"Expressiveness" slider** — maps to `noiseScale`. Range 0.0–1.0, step 0.05. Displays current value. When set to `null` (default), shows "Voice default".
-- **"Rhythm variation" slider** — maps to `noiseW`. Range 0.0–1.0, step 0.05. Displays current value. When set to `null` (default), shows "Voice default".
-- A **"Reset"** link next to each slider restores it to `null` (voice default).
+- **"Expressiveness" slider** — maps to `noiseScale`. Range 0.0–1.0, step 0.05. Displays current value.
+- **"Rhythm variation" slider** — maps to `noiseW`. Range 0.0–1.0, step 0.05. Displays current value.
+- Both sliders start **disabled/hidden** when the setting is `null` (voice default). The label shows "Voice default" with a **"Customize"** link that enables the slider, initializing it to a sensible midpoint (0.5). A **"Reset"** link next to each slider disables it and restores the value to `null`.
+
+This avoids the problem of HTML range inputs not representing `null` — the slider simply doesn't appear until the user opts in.
 
 ### Per-voice overrides
 
