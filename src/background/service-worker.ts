@@ -1,7 +1,7 @@
 import { MessageType, TtsState } from '../shared/messages.js';
 import type { ExtensionMessage, SpeakMessage } from '../shared/messages.js';
-import { CONTEXT_MENU_ID } from '../shared/constants.js';
-import { getSettings } from '../shared/storage-keys.js';
+import { CONTEXT_MENU_ID, DEFAULT_VOICE } from '../shared/constants.js';
+import { STORAGE_KEYS, getSettings } from '../shared/storage-keys.js';
 
 // --- Offscreen document lifecycle ---
 
@@ -34,12 +34,21 @@ async function ensureOffscreenDocument(): Promise<void> {
 
 // --- Context menu ---
 
-chrome.runtime.onInstalled.addListener(() => {
+chrome.runtime.onInstalled.addListener((details) => {
   chrome.contextMenus.create({
     id: CONTEXT_MENU_ID,
     title: 'Speak selected text',
     contexts: ['selection'],
   });
+
+  // Migrate FemaleVBS → default voice on update
+  if (details.reason === 'update') {
+    chrome.storage.sync.get(STORAGE_KEYS.SELECTED_VOICE, (result) => {
+      if (result[STORAGE_KEYS.SELECTED_VOICE] === 'FemaleVBS') {
+        chrome.storage.sync.set({ [STORAGE_KEYS.SELECTED_VOICE]: DEFAULT_VOICE });
+      }
+    });
+  }
 });
 
 chrome.contextMenus.onClicked.addListener(async (info, tab) => {
@@ -49,11 +58,13 @@ chrome.contextMenus.onClicked.addListener(async (info, tab) => {
 
   await ensureOffscreenDocument();
 
+  const prosody = await resolveProsody(settings.selectedVoice);
   chrome.runtime.sendMessage({
     type: MessageType.SPEAK,
     text: info.selectionText,
     voiceId: settings.selectedVoice,
     speed: settings.speed,
+    ...prosody,
   } satisfies SpeakMessage);
 
   // Notify the content script about the state
@@ -65,6 +76,15 @@ chrome.contextMenus.onClicked.addListener(async (info, tab) => {
   }
 });
 
+async function resolveProsody(voiceId: string): Promise<{ noiseScale?: number; noiseW?: number }> {
+  const settings = await getSettings();
+  const perVoice = settings.voiceProsody[voiceId];
+  return {
+    noiseScale: perVoice?.noiseScale ?? settings.noiseScale ?? undefined,
+    noiseW: perVoice?.noiseW ?? settings.noiseW ?? undefined,
+  };
+}
+
 // --- Message routing ---
 
 // Track which tab initiated the current speak request
@@ -74,13 +94,14 @@ chrome.runtime.onMessage.addListener(
   (message: ExtensionMessage, sender, sendResponse) => {
     switch (message.type) {
       case MessageType.SPEAK: {
-        // From content script → forward to offscreen
         if (sender.tab?.id) {
           activeTabId = sender.tab.id;
         }
-        ensureOffscreenDocument().then(() => {
-          chrome.runtime.sendMessage(message);
-        });
+        ensureOffscreenDocument()
+          .then(() => resolveProsody(message.voiceId))
+          .then((prosody) => {
+            chrome.runtime.sendMessage({ ...message, ...prosody });
+          });
         return false;
       }
 
@@ -127,6 +148,11 @@ chrome.runtime.onMessage.addListener(
           });
         });
         return true; // async sendResponse
+      }
+
+      case MessageType.OPEN_OPTIONS: {
+        chrome.runtime.openOptionsPage();
+        return false;
       }
 
       case MessageType.DOWNLOAD_PROGRESS: {
