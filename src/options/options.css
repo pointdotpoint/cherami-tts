@@ -41,6 +41,13 @@ h2 {
   margin-bottom: 12px;
 }
 
+h3 {
+  font-size: 14px;
+  font-weight: 600;
+  color: #ffffff;
+  margin-bottom: 8px;
+}
+
 .card {
   background: #1a1a2e;
   border: 1px solid #252540;
@@ -102,6 +109,14 @@ input[type="range"]::-webkit-slider-thumb {
   font-size: 13px;
   color: #8888a0;
   margin-bottom: 16px;
+}
+
+.hint code {
+  background: rgba(124, 131, 255, 0.1);
+  color: #a0a4ff;
+  padding: 1px 5px;
+  border-radius: 3px;
+  font-size: 12px;
 }
 
 #voice-list {
@@ -185,6 +200,11 @@ input[type="range"]::-webkit-slider-thumb {
   color: #2ed573;
 }
 
+.badge-custom {
+  background: rgba(255, 165, 0, 0.15);
+  color: #ffa500;
+}
+
 .progress-bar {
   width: 80px;
   height: 6px;
@@ -200,9 +220,321 @@ input[type="range"]::-webkit-slider-thumb {
   transition: width 0.2s;
 }
 
+/* --- Play/stop icon buttons --- */
+
+.btn-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  background: transparent;
+  border: 1px solid #303050;
+  border-radius: 6px;
+  cursor: pointer;
+  color: #a0a0b0;
+  transition: border-color 0.15s, color 0.15s;
+  padding: 0;
+  flex-shrink: 0;
+}
+
+.btn-icon:hover {
+  border-color: #7c83ff;
+  color: #7c83ff;
+}
+
+.btn-icon.btn-stop {
+  border-color: #ff4757;
+  color: #ff4757;
+}
+
+.btn-icon.btn-stop:hover {
+  border-color: #ff6b6b;
+  color: #ff6b6b;
+}
+
+/* --- Spinner --- */
+
+.sample-spinner {
+  width: 16px;
+  height: 16px;
+  border: 2px solid #303050;
+  border-top-color: #7c83ff;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+  flex-shrink: 0;
+  margin: 0 7px;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* --- Alert component --- */
+
+#alert-container {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+#alert-container:empty {
+  margin: 0;
+}
+
+#alert-container:not(:empty) {
+  margin-bottom: 16px;
+}
+
+.alert {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 14px;
+  border-radius: 8px;
+  font-size: 13px;
+  opacity: 0;
+  transform: translateY(-8px);
+  transition: opacity 0.2s, transform 0.2s;
+}
+
+.alert-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.alert-exit {
+  opacity: 0;
+  transform: translateY(-8px);
+}
+
+.alert-error {
+  background: rgba(255, 71, 87, 0.12);
+  color: #ff6b6b;
+  border: 1px solid rgba(255, 71, 87, 0.25);
+}
+
+.alert-success {
+  background: rgba(46, 213, 115, 0.12);
+  color: #2ed573;
+  border: 1px solid rgba(46, 213, 115, 0.25);
+}
+
+.alert-close {
+  appearance: none;
+  background: transparent;
+  border: none;
+  color: inherit;
+  font-size: 16px;
+  cursor: pointer;
+  opacity: 0.6;
+  padding: 0 2px;
+  line-height: 1;
+  flex-shrink: 0;
+  transition: opacity 0.15s;
+}
+
+.alert-close:hover {
+  opacity: 1;
+}
+
+/* --- Custom voices section --- */
+
+.custom-voices-section {
+  border-top: 1px solid #252540;
+  margin-top: 20px;
+  padding-top: 20px;
+}
+
+#custom-voice-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+#custom-voice-list:not(:empty) {
+  margin-bottom: 16px;
+}
+
+/* --- Upload form --- */
+
+.upload-form {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  background: #12121f;
+  border: 1px solid #252540;
+  border-radius: 8px;
+  padding: 16px;
+}
+
+.upload-form input[type="text"] {
+  background: #0f0f1a;
+  border: 1px solid #303050;
+  border-radius: 8px;
+  color: #e0e0e0;
+  font-size: 14px;
+  padding: 10px 12px;
+  outline: none;
+  transition: border-color 0.15s;
+}
+
+.upload-form input[type="text"]:focus {
+  border-color: #7c83ff;
+}
+
+.upload-form input[type="text"]::placeholder {
+  color: #555570;
+}
+
+.upload-form input[type="file"] {
+  font-size: 13px;
+  color: #a0a0b0;
+}
+
+.upload-form input[type="file"]::file-selector-button {
+  appearance: none;
+  background: #252540;
+  border: 1px solid #303050;
+  border-radius: 6px;
+  color: #e0e0e0;
+  font-size: 12px;
+  padding: 6px 12px;
+  cursor: pointer;
+  margin-right: 8px;
+  transition: border-color 0.15s;
+}
+
+.upload-form input[type="file"]::file-selector-button:hover {
+  border-color: #7c83ff;
+}
+
+.upload-form .btn {
+  align-self: flex-start;
+  margin-top: 4px;
+}
+
+/* --- Test voice textarea --- */
+
+.test-voice-field {
+  margin-top: 16px;
+}
+
+.test-voice-field textarea {
+  background: #12121f;
+  border: 1px solid #303050;
+  border-radius: 8px;
+  color: #e0e0e0;
+  font-family: inherit;
+  font-size: 14px;
+  padding: 10px 12px;
+  outline: none;
+  resize: vertical;
+  transition: border-color 0.15s;
+  width: 100%;
+}
+
+.test-voice-field textarea:focus {
+  border-color: #7c83ff;
+}
+
+.test-voice-field textarea::placeholder {
+  color: #555570;
+}
+
+.test-voice-field .btn {
+  align-self: flex-start;
+}
+
 footer {
   text-align: center;
   margin-top: 32px;
   font-size: 12px;
   color: #555570;
+}
+
+/* --- Advanced section --- */
+
+.advanced-toggle {
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  user-select: none;
+}
+
+.toggle-arrow {
+  font-size: 12px;
+  transition: transform 0.2s;
+  color: #8888a0;
+}
+
+.toggle-arrow.open {
+  transform: rotate(90deg);
+}
+
+.advanced-content {
+  margin-top: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.prosody-field label {
+  margin-bottom: 4px;
+}
+
+.prosody-control {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.prosody-control input[type="range"] {
+  flex: 1;
+}
+
+.prosody-control input[type="range"]:disabled {
+  opacity: 0.3;
+}
+
+.btn-link {
+  appearance: none;
+  background: transparent;
+  border: none;
+  color: #7c83ff;
+  font-size: 12px;
+  cursor: pointer;
+  padding: 0;
+  white-space: nowrap;
+  transition: opacity 0.15s;
+}
+
+.btn-link:hover {
+  opacity: 0.8;
+}
+
+/* --- Per-voice prosody overrides --- */
+
+.voice-item {
+  flex-wrap: wrap;
+}
+
+.voice-prosody {
+  width: 100%;
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px solid #252540;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.voice-prosody .prosody-control {
+  font-size: 12px;
+}
+
+.voice-prosody label {
+  font-size: 11px;
 }
