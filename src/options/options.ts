@@ -84,6 +84,16 @@ function slugify(name: string): string {
 
 // --- Play/stop sample ---
 
+function resolveCurrentProsody(voiceId: string): { noiseScale?: number; noiseW?: number } {
+  const perVoice = voiceProsodyOverrides[voiceId];
+  const globalNoiseScale = noiseScaleSlider.disabled ? null : parseFloat(noiseScaleSlider.value);
+  const globalNoiseW = noiseWSlider.disabled ? null : parseFloat(noiseWSlider.value);
+  return {
+    noiseScale: perVoice?.noiseScale ?? globalNoiseScale ?? undefined,
+    noiseW: perVoice?.noiseW ?? globalNoiseW ?? undefined,
+  };
+}
+
 function playSample(voiceId: string) {
   // Stop any currently playing sample first
   if (currentlyPlayingVoiceId) {
@@ -98,11 +108,13 @@ function playSample(voiceId: string) {
 
   const text = testText.value.trim() || SAMPLE_TEXT;
   const speed = parseFloat(speedSlider.value);
+  const prosody = resolveCurrentProsody(voiceId);
   chrome.runtime.sendMessage({
     type: MessageType.SPEAK,
     text,
     voiceId,
     speed,
+    ...prosody,
   });
 }
 
