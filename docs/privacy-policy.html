@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cherami TTS - Privacy Policy</title>
+  <style>
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; max-width: 640px; margin: 2rem auto; padding: 0 1rem; line-height: 1.6; color: #333; }
+    h1 { font-size: 1.5rem; }
+    h2 { font-size: 1.15rem; margin-top: 1.5rem; }
+  </style>
+</head>
+<body>
+  <h1>Cherami TTS - Privacy Policy</h1>
+  <p><strong>Last updated:</strong> March 22, 2026</p>
+
+  <h2>Summary</h2>
+  <p>Cherami TTS does not collect, store, or transmit any personal data. All text-to-speech processing happens entirely within your browser.</p>
+
+  <h2>Data Collection</h2>
+  <p>This extension does <strong>not</strong> collect any data. Specifically:</p>
+  <ul>
+    <li>No text you select or speak is sent to any server.</li>
+    <li>No browsing history or page content is collected.</li>
+    <li>No analytics, telemetry, or tracking of any kind is used.</li>
+    <li>No cookies are set.</li>
+  </ul>
+
+  <h2>Local Processing</h2>
+  <p>All speech synthesis is performed locally using a WASM-based TTS engine (Piper) running inside the extension. Voice models are downloaded once from HuggingFace and cached in your browser's local IndexedDB storage. No data leaves your browser during normal use.</p>
+
+  <h2>Permissions</h2>
+  <p>The extension requests the following permissions, all used locally:</p>
+  <ul>
+    <li><strong>Active Tab / All URLs</strong> — to read selected text on the current page for speech synthesis.</li>
+    <li><strong>Storage / Unlimited Storage</strong> — to cache voice model files locally in IndexedDB.</li>
+    <li><strong>Offscreen</strong> — to run the TTS engine and play audio in a background document.</li>
+    <li><strong>Context Menus</strong> — to add a "Speak selected text" option to the right-click menu.</li>
+  </ul>
+
+  <h2>Third-Party Services</h2>
+  <p>Voice models are downloaded from HuggingFace (<code>huggingface.co</code>) when you first select a voice. No personal data is sent in these requests.</p>
+
+  <h2>Changes to This Policy</h2>
+  <p>If this policy changes, the updated version will be posted here with a new date.</p>
+
+  <h2>Contact</h2>
+  <p>For questions about this privacy policy, open an issue on the project's GitHub repository.</p>
+</body>
+</html>
